@@ -51,6 +51,9 @@ var crap = module.exports = {
       }
       if(debug.enabled) debug("using builder: " + pathname);
       return get_builder(crap_cfg, type, name, callable, args);
+    },
+    fn: function(crap_cfg, type, name, source) {
+      return get_builder(crap_cfg, type, name, source, []);
     }
   }
 };
@@ -138,7 +141,8 @@ function load(type) {
     if(!cfg.root) cfg.root = root;
 
     if (typeof cfg.source == 'function') {
-      tasks[name] = get_builder(cfg, type, name, cfg.source, []);
+      var loader = get_loader('fn', cfg, crap.config, crap);
+      tasks[name] = loader(cfg, type, name, cfg.source);
       return;
     }
     var source = url.parse(cfg.source || crap.resolve(cfg.root || root, type, name));
