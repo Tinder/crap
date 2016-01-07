@@ -11,7 +11,7 @@ module.exports.deps = function() {
       auth: require('../middleware/auth.js').deps()
     },
     controllers: {
-      account: require('../controllers/account.js').deps()
+      account: require('../alternates/account.js').deps()
     }
   }
 }

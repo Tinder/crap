@@ -41,50 +41,53 @@ var crap = module.exports = {
         pathname = path.resolve(crap_cfg.root, source.pathname);
       var query = source.query;
       var hash = source.hash && source.hash.substr(1);
+      var args = hash? hash.split(',') : [];
+      var callable = require(pathname);
 
-      return function(cb) {
-        if(debug.enabled) debug("using builder: " + pathname);
-        var builder = require(pathname);
-        var args = hash? hash.split(',') : [];
-        args.push(cb);
-
-        if(query) {
-          builder = builder[query];
-          if(typeof builder !== "function")
-            throw new Error("Cannot execute property: name='"+query+"', type='"+(typeof builder)+"', file='"+pathname+"'");
-        }
-        var ctx = {
-          config: crap_cfg,
-          type: type,
-          name: name
-        };
-        ctx.load = bind_helpers(ctx);
-        if(builder.name !== "auto" && !builder.__auto)
-          return builder.apply(ctx, args);
-
-        //auto load; infer dependencies from config
-        var tasks = {};
-        if(debug.enabled) debug("inferring dependencies from config:");
-        types.forEach(function(type) {
-          var cfg = crap_cfg[type];
-          var keys = cfg && Object.keys(cfg);
-          if(keys && keys.length){
-            tasks[type] = load.bind(ctx, type, keys, crap_cfg);
-            if(debug.enabled) debug("\t"+type+": " + keys);
-          }
-        });
-        parallel(tasks, function(err, results) {
-          if(err) return cb(err);
-          args.unshift(results);
-          var return_value = builder.apply(ctx, args);
-          if(return_value && typeof return_value.then === "function")
-            return_value.then(cb.bind(null, null), cb);
-        });
+      if(query) {
+        callable = callable[query];
+        if(typeof callable !== "function")
+          throw new Error("Cannot execute property: name='"+query+"', type='"+(typeof callable)+"', file='"+pathname+"'");
       }
+      if(debug.enabled) debug("using builder: " + pathname);
+      return get_builder(crap_cfg, type, name, callable, args);
     }
   }
 };
 crap.load = bind_helpers(crap);
+
+function get_builder(crap_cfg, type, name, callable, args) {
+  return function(cb) {
+    args.push(cb);
+    var ctx = {
+      config: crap_cfg,
+      type: type,
+      name: name
+    };
+    ctx.load = bind_helpers(ctx);
+    if(callable.name !== "auto" && !callable.__auto)
+      return callable.apply(ctx, args);
+
+    //auto load; infer dependencies from config
+    var tasks = {};
+    if(debug.enabled) debug("inferring dependencies from config:");
+    types.forEach(function(type) {
+      var cfg = crap_cfg[type];
+      var keys = cfg && Object.keys(cfg);
+      if(keys && keys.length){
+        tasks[type] = load.bind(ctx, type, keys, crap_cfg);
+        if(debug.enabled) debug("\t"+type+": " + keys);
+      }
+    });
+    parallel(tasks, function(err, results) {
+      if(err) return cb(err);
+      args.unshift(results);
+      var return_value = callable.apply(ctx, args);
+      if(return_value && typeof return_value.then === "function")
+        return_value.then(cb.bind(null, null), cb);
+    });
+  }
+}
 
 function get_loader(protocol) {
   for (var i=1; i<arguments.length; i++) {
@@ -132,10 +135,14 @@ function load(type) {
   if(debug.enabled) debug("loading "+type+": " +list.join());
   list.forEach(function(name) {
     var cfg = (crap_cfg[type] && crap_cfg[type][name]) || {};
+    if(!cfg.root) cfg.root = root;
 
+    if (typeof cfg.source == 'function') {
+      tasks[name] = get_builder(cfg, type, name, cfg.source, []);
+      return;
+    }
     var source = url.parse(cfg.source || crap.resolve(cfg.root || root, type, name));
     var protocol = (source.protocol || "file:").replace(/:$/,'');
-    if(!cfg.root) cfg.root = root;
 
     var loader = get_loader(protocol, cfg, crap.config, crap);
     if(!loader) throw Error('Unknown protocol: "'+ protocol+'"');
