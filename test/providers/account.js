@@ -33,6 +33,6 @@ module.exports.deps = function(restrict) {
     }
   }
   return {
-    resources: (useInclude ? included : excluded),
+    resources: (useInclude ? included : excluded)
   };
 }
