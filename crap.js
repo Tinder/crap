@@ -2,6 +2,7 @@ var parallel = require('./parallel.js');
 var url = require("url");
 var path = require("path");
 var fs = require("fs");
+var assign = require("object-assign");
 var debug = require("debug")("crap");
 var cache = {};
 
@@ -85,6 +86,39 @@ var crap = module.exports = {
   }
 };
 crap.load = bind_helpers(crap);
+
+crap.deps = function(mapping) {
+  return function(fns) {
+    fns = fns || {};
+
+    var included = {};
+    var notExcluded = {};
+    var useInclude = false;
+
+    for (var k in mapping) {
+      if (!mapping.hasOwnProperty(k)) continue;
+
+      var cfg = null;
+
+      if (fns[k]) {
+        useInclude = true;
+        cfg = included;
+      } else if (fns[k] == undefined) {
+        cfg = notExcluded;
+      }
+
+      if (!cfg) continue;
+
+      types.forEach(function(type) {
+        if (!mapping[k][type]) return;
+        if (!cfg[type]) cfg[type] = {};
+        assign(cfg[type], mapping[k][type]);
+      });
+    }
+
+    return (useInclude ? included : notExcluded);
+  }
+};
 
 function get_loader(protocol) {
   for (var i=1; i<arguments.length; i++) {

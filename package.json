@@ -21,6 +21,7 @@
     "should": "^4.0.4"
   },
   "dependencies": {
-    "debug": "^2.0.0"
+    "debug": "^2.0.0",
+    "object-assign": "^4.0.1"
   }
 }
