@@ -1,6 +1,6 @@
 {
   "name": "crap",
-  "version": "5.0.8",
+  "version": "5.0.9",
   "description": "Ⓒontrollers Ⓡesources Ⓐnd ⓟroviders framework",
   "homepage": "https://github.com/tinder/crap",
   "main": "crap.js",
@@ -21,6 +21,7 @@
     "should": "^4.0.4"
   },
   "dependencies": {
-    "debug": "^2.0.0"
+    "debug": "^2.0.0",
+    "object-assign": "^4.0.1"
   }
 }
