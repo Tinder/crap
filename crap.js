@@ -2,7 +2,7 @@ var parallel = require('./parallel.js');
 var url = require("url");
 var path = require("path");
 var fs = require("fs");
-var assign = require("object-assign");
+var merge = require("lodash.merge");
 var debug = require("debug")("crap");
 var cache = {};
 
@@ -60,7 +60,7 @@ var crap = module.exports = {
         types.forEach(function(type) {
           if (!mapping[k][type]) return;
           if (!cfg[type]) cfg[type] = {};
-          assign(cfg[type], mapping[k][type]);
+          merge(cfg[type], mapping[k][type]);
         });
       }
 
