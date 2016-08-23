@@ -1,3 +1,5 @@
+'use strict';
+
 var crap = require("../");
 var config = require("./crap.verbose.config.js");
 var should = require('should');
@@ -47,6 +49,7 @@ describe('crap load', function () {
       .catch(done);
     });
   }
+
   describe('without Promises', function () {
     if(typeof Promise!=='undefined') {
       var promise = Promise;
@@ -56,7 +59,6 @@ describe('crap load', function () {
     }
 
     it('should load an entire chain of CRaP', function (done) {
-      Promise = undefined;
       crap.load.apps(config, function(err, apps) {
         should.not.exist(err);
         should.exist(apps);
@@ -64,18 +66,23 @@ describe('crap load', function () {
         done();
       });
     });
+
+    it('should load an entire chain of CRaP using local configs', function (done) {
+      crap.load.apps('profile', {
+        root: __dirname,
+        apps:{profile: require('./apps/profile.js').deps()}
+      }, function(err, apps) {
+        should.not.exist(err);
+        should.exist(apps);
+        apps.should.eql(interfaces);
+        done();
+      });
+    });
+  });
+
+  it('should load crap config', function () {
+    crap.config = config;
+    crap.config.should.eql(config)
   });
 });
 
-it('should load an entire chain of CRaP using local configs', function (done) {
-  Promise = undefined;
-  crap.load.apps('profile', {
-    root: __dirname,
-    apps:{profile: require('./apps/profile.js').deps()}
-  }, function(err, apps) {
-    should.not.exist(err);
-    should.exist(apps);
-    apps.should.eql(interfaces);
-    done();
-  });
-});
