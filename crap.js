@@ -1,3 +1,5 @@
+'use strict';
+
 var parallel = require('./parallel.js');
 var url = require("url");
 var path = require("path");
@@ -11,8 +13,12 @@ var types = ["apis","apps","middleware","controllers","providers","resources"];
 var crap = module.exports = {
   root: process.cwd(),
   get config() {
+    if (this._config) return this._config;
     var p = crap.root + '/crap.config.js';
     return crap.open(p);
+  },
+  set config(cf) {
+    this._config = cf;
   },
   open: function(filename) {
     var result = cache[filename];
