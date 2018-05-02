@@ -56,7 +56,7 @@ describe('crap load', function () {
     }
 
     it('should load an entire chain of CRaP', function (done) {
-      //Promise = undefined;
+      Promise = undefined;
       crap.load.apps(config, function(err, apps) {
         should.not.exist(err);
         should.exist(apps);
