@@ -56,7 +56,7 @@ describe('crap load', function () {
     }
 
     it('should load an entire chain of CRaP', function (done) {
-      Promise = undefined;
+      //Promise = undefined;
       crap.load.apps(config, function(err, apps) {
         should.not.exist(err);
         should.exist(apps);
@@ -68,7 +68,6 @@ describe('crap load', function () {
 });
 
 it('should load an entire chain of CRaP using local configs', function (done) {
-  Promise = undefined;
   crap.load.apps('profile', {
     root: __dirname,
     apps:{profile: require('./apps/profile.js').deps()}
