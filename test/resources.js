@@ -8,9 +8,7 @@ module.exports = {
     source: "./resources/mongo.js?collection#connections"
   },
   facebook: {
-    settings: {
-      api_key: "nasvdasodino4in0v8n302n3inc09"
-    },
+    settings: {},
     source: "./resources/facebook.js"
   },
   session: {
